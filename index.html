@@ -553,6 +553,36 @@ function clearAll() {
   document.getElementById("textB").innerHTML = "";
   document.getElementById("diffStats").style.display = "none";
 }
+  // Alt+Ctrl+L: 클립보드 내용을 A창(초고)에 붙여넣기
+// Alt+Ctrl+R: 클립보드 내용을 B창(수정고)에 붙여넣기
+document.addEventListener("keydown", async (e) => {
+  const key = e.key.toLowerCase();
+  const isShortcut = e.altKey && e.ctrlKey && (key === "l" || key === "r");
+  if (!isShortcut) return;
+
+  e.preventDefault();
+
+  if (!navigator.clipboard || !navigator.clipboard.readText) {
+    alert("이 브라우저에서는 클립보드 자동 읽기가 지원되지 않습니다. HTTPS 환경에서 사용해주세요.");
+    return;
+  }
+
+  try {
+    const clip = await navigator.clipboard.readText();
+    const normalized = clip.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+    if (key === "l") {
+      document.getElementById("textA").value = normalized;
+      document.getElementById("textA").focus();
+    } else if (key === "r") {
+      rawTextB = normalized;
+      document.getElementById("textB").focus();
+    }
+    runComparison();
+  } catch (err) {
+    alert("클립보드 읽기에 실패했습니다: " + err.message + "\n브라우저의 클립보드 권한을 확인해주세요.");
+  }
+});
 
 </script>
 
