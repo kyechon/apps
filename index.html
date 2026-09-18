@@ -107,6 +107,17 @@
     border-color: #93c5fd;
   }
 
+  .btn-paste-pane {
+    color: #15803d;
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+  }
+  .btn-paste-pane:hover {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #86efac;
+  }
+
   .slider-container { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
   .slider-container input[type="range"] { width: 110px; }
 
@@ -281,6 +292,7 @@
       <div class="pane-header">
         <span>A. 초고 (원본)</span>
         <div class="pane-header-actions">
+          <button class="btn-header btn-paste-pane" onclick="pasteToPaneA()" title="클립보드 내용을 A창에 붙여넣기">📥 붙여넣기</button>
           <button class="btn-header btn-clear-pane" onclick="clearPaneA()" title="A창 내용만 비우기">✕ A 비우기</button>
         </div>
       </div>
@@ -294,6 +306,7 @@
       <div class="pane-header">
         <span>B. 수정고 (비교 결과)</span>
         <div class="pane-header-actions">
+          <button class="btn-header btn-paste-pane" onclick="pasteToPaneB()" title="클립보드 내용을 B창에 붙여넣기">📥 붙여넣기</button>
           <button id="btnCopyB" class="btn-header btn-copy-pane" onclick="copyFormattedB()" title="붉은색/취소선 서식 그대로 복사">📋 복사하기</button>
           <button class="btn-header btn-clear-pane" onclick="clearPaneB()" title="B창 내용만 비우기">✕ B 비우기</button>
         </div>
@@ -553,36 +566,40 @@ function clearAll() {
   document.getElementById("textB").innerHTML = "";
   document.getElementById("diffStats").style.display = "none";
 }
-  // Alt+Ctrl+L: 클립보드 내용을 A창(초고)에 붙여넣기
-// Alt+Ctrl+R: 클립보드 내용을 B창(수정고)에 붙여넣기
-document.addEventListener("keydown", async (e) => {
-  const key = e.key.toLowerCase();
-  const isShortcut = e.altKey && e.ctrlKey && (key === "l" || key === "r");
-  if (!isShortcut) return;
 
-  e.preventDefault();
-
+// A창(초고)에 클립보드 내용 붙여넣기
+async function pasteToPaneA() {
   if (!navigator.clipboard || !navigator.clipboard.readText) {
     alert("이 브라우저에서는 클립보드 자동 읽기가 지원되지 않습니다. HTTPS 환경에서 사용해주세요.");
     return;
   }
-
   try {
     const clip = await navigator.clipboard.readText();
     const normalized = clip.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-    if (key === "l") {
-      document.getElementById("textA").value = normalized;
-      document.getElementById("textA").focus();
-    } else if (key === "r") {
-      rawTextB = normalized;
-      document.getElementById("textB").focus();
-    }
+    document.getElementById("textA").value = normalized;
+    document.getElementById("textA").focus();
     runComparison();
   } catch (err) {
     alert("클립보드 읽기에 실패했습니다: " + err.message + "\n브라우저의 클립보드 권한을 확인해주세요.");
   }
-});
+}
+
+// B창(수정고)에 클립보드 내용 붙여넣기
+async function pasteToPaneB() {
+  if (!navigator.clipboard || !navigator.clipboard.readText) {
+    alert("이 브라우저에서는 클립보드 자동 읽기가 지원되지 않습니다. HTTPS 환경에서 사용해주세요.");
+    return;
+  }
+  try {
+    const clip = await navigator.clipboard.readText();
+    const normalized = clip.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    rawTextB = normalized;
+    document.getElementById("textB").focus();
+    runComparison();
+  } catch (err) {
+    alert("클립보드 읽기에 실패했습니다: " + err.message + "\n브라우저의 클립보드 권한을 확인해주세요.");
+  }
+}
 
 </script>
 
